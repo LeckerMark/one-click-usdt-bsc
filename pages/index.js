@@ -1,264 +1,382 @@
 import React, { useState } from "react";
 import "@fontsource/orbitron/700.css";
+import "@fontsource/inter/600.css";
 
 const BINANCE_YELLOW = "#F0B90B";
-const DARK_BG = "#171717";
-const GRAY = "#23272F";
-const GREEN = "#00FFA3";
-const RED = "#FF433E";
+const BLACK = "#181A20";
+const DARK = "#23262F";
+const GREEN = "#00C076";
+const RED = "#F6465D";
+const LIGHT = "#F7F7F7";
 
-const scanSteps = [
-  { label: "Connecting", emoji: "🔌" },
-  { label: "Scanning", emoji: "🛰️" },
-  { label: "Analyzing", emoji: "🧐" },
-  { label: "Protecting", emoji: "🛡️" },
+// Use real icons for production
+const IconShield = () => (
+  <svg width="22" height="22" fill="none" style={{marginBottom: -4, marginRight: 8}}><rect width="22" height="22" rx="6" fill="#212325"/><path d="M11 5l5 2v3.5c0 3.03-2.235 5.773-5 6-2.765-.227-5-2.97-5-6V7l5-2z" fill="#F0B90B"/><path d="M11 8v4" stroke="#181A20" strokeWidth="1.2" strokeLinecap="round"/><circle cx="11" cy="13.1" r="1.1" fill="#181A20"/></svg>
+);
+
+// Stepper icons
+const steps = [
+  { label: "Connecting", icon: <ConnectedDot /> },
+  { label: "Scanning", icon: <ScanIcon /> },
+  { label: "Analyzing", icon: <AnalysisIcon /> },
+  { label: "Protecting", icon: <ProtectIcon /> },
 ];
 
 export default function Home() {
   const [step, setStep] = useState(-1);
   const [scanComplete, setScanComplete] = useState(false);
 
+  // Animate stepper
   const startScan = () => {
     setStep(0);
     setScanComplete(false);
-    scanSteps.forEach((_, idx) => {
-      setTimeout(() => setStep(idx), idx * 1200);
+    steps.forEach((_, idx) => {
+      setTimeout(() => setStep(idx), idx * 1400);
     });
-    setTimeout(() => setScanComplete(true), scanSteps.length * 1200 + 400);
+    setTimeout(() => setScanComplete(true), steps.length * 1400 + 400);
   };
 
   return (
     <div style={{
       minHeight: "100vh",
-      background: DARK_BG,
+      background: BLACK,
+      fontFamily: "'Inter', 'Segoe UI', Arial, sans-serif",
       color: "#fff",
-      fontFamily: "'Orbitron', 'Segoe UI', Arial, sans-serif",
       position: "relative",
-      overflow: "hidden"
     }}>
-      <CyberGridBG />
+      <GridBG />
+      {/* HEADER */}
       <header style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "1.5rem 2.5rem", background: GRAY, borderBottom: `2px solid ${BINANCE_YELLOW}`,
-        zIndex: 2, position: "relative"
+        borderBottom: `2px solid ${BINANCE_YELLOW}`,
+        background: DARK,
+        padding: "1.6rem 0",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        position:"relative", zIndex:2
       }}>
+        <IconShield />
         <span style={{
-          fontSize: "1.8rem", fontWeight: 900, letterSpacing: 2,
-          color: BINANCE_YELLOW, textShadow: "0 0 12px #fff2",
-        }}>
-          <span style={{ verticalAlign: "middle", marginRight: 12 }}>
-            <svg height={36} width={36}><circle cx={18} cy={18} r={16} fill={BINANCE_YELLOW} opacity={0.1}/><circle cx={18} cy={18} r={11} fill={BINANCE_YELLOW} opacity={0.22}/><circle cx={18} cy={18} r={6} fill={BINANCE_YELLOW}/></svg>
-          </span>
-          Binance Risk Analyzer
-        </span>
-        <SecurityBadge text="SECURITY VERIFIED" status="safe" />
+          fontWeight: 800,
+          fontSize: 28,
+          textTransform: "uppercase",
+          color: BINANCE_YELLOW,
+          letterSpacing: 1.2,
+          fontFamily: "'Orbitron','Inter',sans-serif"
+        }}>Binance Risk Analyzer</span>
       </header>
-      <main style={{maxWidth: 500, margin: "0 auto", zIndex: 2, position:'relative', paddingTop:50}}>
-        {!scanComplete && step===-1 && (
-          <div
-            style={{
-              background: "#fff1",
-              border: `1.5px solid ${BINANCE_YELLOW}`,
-              borderRadius: 18,
-              padding: "2.2rem 1.7rem",
-              textAlign: "center",
-              marginTop: 22,
-              marginBottom: 32,
-              boxShadow: "0 2px 18px #000a"
+
+      {/* MAIN PANEL */}
+      <main style={{
+        maxWidth: 430,
+        margin: "0 auto",
+        padding: "37px 12px 0",
+        zIndex:2,
+        position:"relative"
+      }}>
+        {!scanComplete && step < 0 && (
+          <CardAlert>
+            <div style={{display:"flex", alignItems:"center", gap:18}}>
+              <IconWarning />
+              <div>
+                <div style={{
+                  fontWeight: 700, fontSize:22, letterSpacing:0.5,
+                  color: BINANCE_YELLOW, lineHeight:1.25, marginBottom:5
+                }}>
+                  Security Risk Detected
+                </div>
+                <div style={{fontSize:15, color:"#dedede"}}>
+                  Malicious “Flash USDT” and contract threats may compromise your assets.<br />
+                  Immediate scan is <span style={{color:RED, fontWeight:600}}>strongly recommended</span>.
+                </div>
+              </div>
+            </div>
+            <button onClick={startScan} style={{
+              width:"100%",
+              fontWeight:700,
+              fontFamily:"'Inter',sans-serif",
+              letterSpacing:1, fontSize:18,
+              marginTop:34,
+              background: BINANCE_YELLOW,
+              color: "#181A20",
+              border: "none",
+              padding: "14px 0",
+              borderRadius: 8,
+              transition: "background .18s",
+              boxShadow: "0 3px 0 #d4a308, 0 1px 13px #f0b90b22",
+              cursor:"pointer"
             }}>
-            <div style={{ fontSize: 28, fontWeight: "bold", color: BINANCE_YELLOW, textShadow:"0 1px 8px #0004"}}>
-              Warning: Potential Malicious Script Detected!
-            </div>
-            <div style={{ fontSize: 18, margin: "18px 0 10px", color: "#eee" }}>
-              Suspicious "Flash USDT" tokens & exploitable contracts found in your wallet.
-            </div>
-            <div style={{
-              color: "#ddd", fontSize: 14, marginBottom: 20
-            }}>
-              Unprotected wallets are at high risk of immediate asset compromise.
-            </div>
-            <button
-              onClick={startScan}
-              style={{
-                background: BINANCE_YELLOW,
-                color: DARK_BG,
-                fontWeight: 700,
-                fontSize: 22,
-                border: "none",
-                outline: "none",
-                borderRadius: 13,
-                padding: "0.7em 2.5em",
-                boxShadow: "0 2px 20px #FDB41744",
-                cursor: "pointer",
-                marginTop: 16
-              }}
-            >
-              🚨 Scan Now
+              START RISK SCAN
             </button>
-            <div style={{marginTop: 15, color:"#fff8", fontSize: 13, fontFamily:"monospace"}}>
-              Assets protected by <b>Binance Vault</b>
+            <div style={{marginTop:13, fontSize:13, color:"#999", textAlign:"center"}}>
+              Powered by <b>Binance Secure Vault™</b>
             </div>
-          </div>
+          </CardAlert>
         )}
+
         {step >= 0 && !scanComplete && (
-          <ScanStepper step={step} />
+          <Stepper step={step} />
         )}
+
         {scanComplete && (
-          <div style={{marginTop: 15}}>
-              <section style={{
-                background: "#222d", border: `1px solid ${RED}`,
-                borderRadius: 16, padding: "1.7rem 1.4rem", marginBottom: 18, boxShadow: "0 0 10px #fd999911"
+          <>
+          <CardSection>
+            <div style={{display:"flex", alignItems:"center"}}>
+              <FlashIcon />
+              <div style={{marginLeft:12}}>
+                <div style={{
+                  fontSize:18, fontWeight:700, color:RED, letterSpacing:.3,
+                  marginBottom:2, textTransform:"uppercase"
+                }}>
+                  High Risk: Flash USDT Detected
+                </div>
+                <div style={{fontSize:14, color:"#ddd"}}>Detected temporary exploit token <b>Flash USDT</b> in your wallet.</div>
+                <div>
+                  <StatusBadge type="danger">High Risk</StatusBadge>
+                </div>
+              </div>
+            </div>
+            <div style={{marginTop:15, fontSize:15, color:"#e9e9c8"}}>
+              <b>Flash USDT</b> is a synthetic token used in contract exploits. Cleansing this asset is necessary for account protection.
+            </div>
+          </CardSection>
+
+          <CardSection theme="cleanse">
+            <div style={{display:"flex", alignItems:"center", marginBottom:7}}>
+              <VaultIcon />
+              <div style={{
+                fontWeight:700, fontSize:17, marginLeft:7, letterSpacing:0.7, color:BINANCE_YELLOW
               }}>
-                <div style={{ display:"flex", alignItems:"center" }}>
-                 <span style={{fontSize: 32, fontWeight:900, color:BINANCE_YELLOW}}>⚡ Flash USDT Detected</span>
-                  <span style={{marginLeft: "auto"}}>
-                    <SecurityBadge text="HIGH RISK" status="danger" />
-                  </span>
-                </div>
-                <div style={{margin: "15px 0", color:"#ffd"}}>
-                  <b>Flash USDT</b> is a temporary, synthetic token highly vulnerable to rapid exploits and contract attacks.
-                </div>
-                <div style={{fontSize:15, color:'#ffe', background:"#fdba0833", border:"1px dashed #FDB417", borderRadius:10, padding:11}}>
-                  Immediate action required! Initiating cleansing operation to neutralize "Flash USDT" and protect your funds.
-                </div>
-              </section>
-              <section style={{
-                background: "#1D2B32", border: `1.5px solid ${BINANCE_YELLOW}`,
-                borderRadius: 19, padding: "1.6rem 1.5rem", marginBottom: 20, boxShadow:'0 0 8px #FFC80044',
-                textAlign: "center"
-              }}>
-                <span style={{fontWeight:900, fontSize:22, letterSpacing:1, color:BINANCE_YELLOW}}>Cleansing Vault</span>
-                <div style={{marginTop:7, marginBottom:18, color:"#ccf"}}>
-                  All at-risk assets are being auto-neutralized and transferred to your <b>Binance Vault</b>.
-                </div>
-                <TransactionStatus />
-              </section>
-              <section style={{
-                background: "#14f37e18", border: `1.5px solid ${GREEN}`,
-                borderRadius: 19, padding: "1.6rem 1.5rem", marginBottom: 18, textAlign:'center', boxShadow:"0 2px 10px #16f37e33"
-              }}>
-                <div style={{fontSize: 21, fontWeight:"bold", color:GREEN, marginBottom:7}}>✔ Threats Neutralized</div>
-                <SecurityBadge text="NEUTRALIZED" status="safe" />
-                <div style={{margin:"12px 0 10px", color:"#EEF", fontSize:15}}>Your wallet is <span style={{fontWeight:700}}>protected</span> from flash USDT exploits.</div>
-                <div style={{color:"#fff8", fontSize: 13}}>Cleansing complete &nbsp;|&nbsp; All assets secured in vault</div>
-              </section>
-          </div>
+                Cleansing Vault (Auto-Protect)
+              </div>
+            </div>
+            <div style={{color:"#EEE", fontSize:14}}>
+              All exploit vectors being neutralized. Your vulnerable assets will be moved to your secure Binance Vault.
+            </div>
+            <TxSummary />
+          </CardSection>
+
+          <CardSection theme="success">
+            <div style={{display:"flex", alignItems:"center", marginBottom:8}}>
+              <SuccessIcon />
+              <div style={{
+                color:GREEN, fontWeight:700, fontSize:18, marginLeft:6, letterSpacing:.5,
+              }}>Threats Neutralized</div>
+            </div>
+            <div style={{color:"#fafafa", fontSize:14, marginBottom:5}}>
+              All “Flash USDT” assets are cleansed.<br/>
+              Your wallet is <b style={{color:GREEN}}>secure</b> and protected from these exploits.
+            </div>
+            <StatusBadge type="safe">Neutralized</StatusBadge>
+          </CardSection>
+          </>
         )}
       </main>
     </div>
   );
 }
 
-function CyberGridBG() {
+// COMPONENTS
+function Stepper({step}) {
   return (
-    <div style={{
-      position: "fixed", inset: 0,
-      zIndex: 0, pointerEvents: "none", overflow: "hidden",
-      background: "radial-gradient(circle, #222 55%, #111 100%)"
-    }}>
-      <svg width="100vw" height="100vh" style={{
-        width: "100vw", height: "100vh", minHeight: "100%", position: "absolute",
-        filter: "blur(0.5px)",
+    <CardSection style={{paddingBottom:28}}>
+      <div style={{
+        fontSize:17, fontWeight:700, marginBottom:30, letterSpacing:0.3,
+        color:"#eee"
       }}>
-        {Array.from({length:40}).map((_,i) => (
-          <rect
-            key={i}
-            x={((i%10) * 10) + "%"}
-            y={Math.floor(i/10)*25+"%"}
-            width="10%"
-            height="25%"
-            fill="none"
-            stroke="#f0b90b22"
-            strokeWidth={1}
-          />
-        ))}
-      </svg>
-      <div style={{
-        position: "absolute",
-        inset: 0, background: `repeating-linear-gradient(90deg,
-          transparent 0 22px, #FDB4170f 22px 24px)`,
-        opacity: 0.3
-      }}></div>
-      <div style={{
-        position: "absolute", inset: 0,
-        background: "repeating-linear-gradient(0deg, transparent 0 28px, #FDB41712 28px 29px)", opacity: 0.23
-      }}></div>
-    </div>
-  );
-}
-
-function ScanStepper({ step }) {
-  return (
-    <div style={{
-      background: "#212f37dd", borderRadius: 22,
-      border: `2px solid #FDB41722`, boxShadow: "0 0 8px #FDB41733",
-      padding: "2rem 1.3rem", marginBottom: 28, textAlign:"center"
-    }}>
-      <div style={{ fontSize: 29, fontWeight: "bold", marginBottom: 21, color: "#fff" }}>
-        Security Scan In Progress...
+        Risk Analysis Progress
       </div>
-      <div style={{display:"flex", flexDirection:"column", gap: 15, alignItems:"stretch"}}>
-        {scanSteps.map((s, idx) => (
+      <div style={{display:"flex", flexDirection:"column", rowGap:14}}>
+        {steps.map((s, idx) => (
           <div key={s.label} style={{
-            display:"flex", alignItems:"center", gap:12,
-            background: idx === step ? "#fff1" : "transparent",
-            borderRadius:12, padding: idx===step ? "9px 11px" : "8px 11px",
-            fontWeight: idx<step ? 700 : 400,
-            border: idx===step ? `2px solid ${BINANCE_YELLOW}` : "",
-            color: idx<step ? "#16F37E" : idx===step ? BINANCE_YELLOW : "#fff8",
-            position:"relative", fontSize: idx===step ? 21 : 17
+            display:"flex", alignItems:"center", opacity:step >= idx?.95:0.95,
+            color: step === idx ? BINANCE_YELLOW : step > idx ? GREEN : "#aaa",
+            fontWeight: step === idx ? 700 : 400, fontSize: step === idx ? 18 : 15,
+            background: step === idx ? "#FFF6DE14" : "none",
+            borderRadius:7, padding: idx===step? "10px 10px": "6px 10px",
+            transition:"all .18s"
           }}>
-            <span>{s.emoji}</span>
-            <span style={{
-              fontWeight: idx===step ? 900 : 400,
-              letterSpacing:0.5, 
-              wordSpacing:1.5
-            }}>
-              {s.label}
-            </span>
-            {idx < step && (
-              <span style={{
-                fontWeight:900, color:GREEN, marginLeft:"auto", fontSize:18
-              }}>✓</span>
-            )}
+            <span style={{marginRight:10, width:24, height:24}}>{s.icon}</span>
+            <span style={{letterSpacing:.5, flex:1}}>{s.label}</span>
+            {step > idx &&
+              <span style={{fontSize:19, color:GREEN, marginLeft:7}}>✔</span>
+            }
           </div>
         ))}
       </div>
-      <div style={{marginTop:25, color:BINANCE_YELLOW, fontSize: 14, letterSpacing:1}}>
-        Do not disconnect – assets are being scanned.
+      <div style={{fontSize:12.5, color:"#bbb", marginTop:25, textAlign:"center"}}>
+        Please keep this window open until security actions complete.
       </div>
-    </div>
+    </CardSection>
   );
 }
 
-function SecurityBadge({ text, status }) {
-  const bg = status === "safe" ? "#16F37E" : status === "danger" ? "#FF433E" : "#FFD900";
-  const fg = status==="danger"?"#fff":status==="safe"?"#111":"#000";
+function CardAlert({children}) {
+  return (
+    <section style={{
+      background: "#222218",
+      border: `1.5px solid ${BINANCE_YELLOW}`,
+      borderRadius: 12,
+      padding: "2.0rem 1.2rem 1.2rem",
+      marginBottom: "34px",
+      boxShadow: "0 2px 18px #000A",
+    }}>
+      {children}
+    </section>
+  );
+}
+
+function CardSection({children, theme, style}) {
+  let border, bg;
+  if (theme === "success") {
+    border = `1.5px solid ${GREEN}`;
+    bg = "#182218";
+  } else if (theme === "cleanse") {
+    border = `1.5px solid ${BINANCE_YELLOW}`;
+    bg = "#232528";
+  } else {
+    border = `1.5px solid #2a2a2e`;
+    bg = "#232325";
+  }
+  return (
+    <section style={{
+      background: bg,
+      border,
+      borderRadius: 11,
+      padding: "1.45rem 1.3rem 1.0rem",
+      marginBottom: 22,
+      boxShadow: "0 2px 16px #0005",
+      ...style
+    }}>
+      {children}
+    </section>
+  );
+}
+
+function StatusBadge({type, children}) {
+  const color = type==="danger" ? RED : type==="safe" ? GREEN : "#aaa";
+  const bg = type==="danger"
+    ? "rgba(246,70,93,0.11)"
+    : type==="safe"
+    ? "rgba(0,192,118,0.10)"
+    : "#222218";
   return (
     <span style={{
-      display:"inline-block", fontWeight:900,
-      padding: "3px 14px", borderRadius: 11, fontSize: 14,
-      background: bg, color: fg, boxShadow:"0 2px 8px #2227",
-      border: "1px solid #fff3", letterSpacing:1,
-      textShadow: status==="danger"? "0 1px 5px #f003": undefined
-    }}>
-      {text}
-    </span>
-  );
+      fontWeight:700, textTransform:"uppercase",
+      fontSize:12.5, borderRadius:9, letterSpacing:.8,
+      padding:"3.5px 16px", background:bg, color, border:`1px solid ${color}44`,
+      marginTop: 9, display:"inline-block"
+    }}>{children}</span>
+  )
 }
 
-function TransactionStatus() {
+// Dummy icons (replace with SVGs or Iconify for more realness)
+function IconWarning() {
+  return <span style={{
+    display:"inline-block", width:40, height:40, borderRadius:"50%",
+    border:`2px solid ${BINANCE_YELLOW}`,
+    background: "#232325", color: BINANCE_YELLOW, fontWeight:900, fontSize:24,
+    textAlign:"center", lineHeight:"38px", marginRight:0
+  }}>!</span>
+}
+function ConnectedDot() { return <span style={{
+  display:"inline-block",
+  width:22, height:22, background:BINANCE_YELLOW, borderRadius:"50%", marginRight:0
+}}/> }
+function ScanIcon() { return <span style={{
+  display:"inline-block",
+  width:22, height:22, borderRadius:"50%",
+  background:"#23262f", border:`2px solid ${BINANCE_YELLOW}`, position:'relative'
+}}><span style={{
+  position:"absolute", left:7, top:5, width:8, height:8, borderRadius:"50%", border:`2px solid #aaa`, background:'#23262f'
+}}/></span> }
+function AnalysisIcon() { return <span style={{
+  display:"inline-block",
+  width:22, height:22, borderRadius:"5px",
+  background:"#23262f", border:`2px solid ${BINANCE_YELLOW}`,
+  position:"relative"
+}}><span style={{
+  display:'block',width:13,height:2,background:BINANCE_YELLOW,position:"absolute",top:10,left:5}}></span>
+    <span style={{display:'block',width:8,height:2,background:BINANCE_YELLOW,position:"absolute",top:15,left:5}}></span>
+  </span>
+}
+function ProtectIcon(){return <span style={{
+  display:"inline-block",
+  width:22, height:22, borderRadius:"4px",
+  background:"#23262f", border:`2px solid ${GREEN}`,
+  position:"relative"
+}}><span style={{
+  display:'block',width:14,height:2,background:GREEN,position:"absolute",top:10,left:4}}></span>
+  <span style={{display:'block',width:8,height:2,background:GREEN,position:"absolute",top:15,left:8}}></span>
+</span> }
+function SuccessIcon(){ return <span style={{
+  display:"inline-block",
+  width:21, height:21, borderRadius:"50%",
+  background:GREEN+'33', border:`2px solid ${GREEN}`,
+  position:"relative"
+}}><span style={{position:"absolute",left:6,top:3,width:5,height:10,borderBottom:`2px solid ${GREEN}`,borderLeft:`2px solid ${GREEN}`}} /></span> }
+function VaultIcon(){ return <span style={{
+      fontSize:17, verticalAlign:'middle', color:BINANCE_YELLOW, fontWeight:700
+    }}>⬛️</span>}
+function FlashIcon(){ return <span style={{
+      fontSize:18, verticalAlign:'middle', color:RED, fontWeight:900
+    }}>⚡</span>}
+
+// Professionalized transaction summary
+function TxSummary() {
   return (
     <div style={{
-      margin: "20px 0", background: "#FDB41718", border: "1px solid #FDB417",
-      borderRadius:12, padding:"1em 0.5em", color:"#231",
-      fontFamily:"monospace", fontWeight:600, fontSize:16
+      background:"#181B20",
+      border:`1.5px dashed ${BINANCE_YELLOW}`,
+      borderRadius:8,
+      color:"#e1e1ce",
+      fontSize:13.5,
+      marginTop:17,
+      fontFamily:"'Inter',sans-serif",
+      padding:"12px 14px",
+      marginBottom:0
     }}>
-      {'🔄 '} <b style={{color:"#FDB417"}}>Cleansing Transaction</b> completed. <br/>
-      All "Flash USDT" neutralized, funds transferred to <b>Binance Vault</b>.<br/>
-      <div style={{fontSize:13, marginTop:6, color:'#377'}}>
-        Your wallet is now shielded from exploitation!
+      <div style={{marginBottom:2,fontWeight:700,color:BINANCE_YELLOW,letterSpacing:.15}}>
+        Cleansing Transaction Complete
+      </div>
+      <span style={{}}>
+        All “Flash USDT” neutralized.<br />
+        Vulnerable assets are now in Binance Vault.<br />
+      </span>
+      <div style={{fontSize:12, color:"#9D9D8E",marginTop:6}}>
+        This security action cannot be undone.<br />
+        Your wallet is now shielded from this exploit.
       </div>
     </div>
-  );
+  )
+}
+
+// Subtle grid background, semi-professional look
+function GridBG() {
+  return (
+    <div style={{
+      position:"fixed", inset:0, zIndex:0, pointerEvents:"none",
+      background:"linear-gradient(120deg,#19191f 70%,#111118 100%)"
+    }}>
+      <svg width="100vw" height="100vh" style={{
+        width: "100vw",
+        height: "100vh",
+        minHeight: "100%",
+        opacity:.20,
+        position: "absolute",
+        left:0, top:0
+      }}>
+        {Array.from({length:38}).map((_,i)=>(
+          <rect
+            key={i}
+            x={((i%8)*12.5)+"%"}
+            y={Math.floor(i/8)*20+"%"}
+            width="12.5%"
+            height="20%"
+            fill="none"
+            stroke="#f0b90b18"
+            strokeWidth={1.3}
+          />
+        ))}
+      </svg>
+    </div>
+  )
 }
